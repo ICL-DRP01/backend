@@ -1,0 +1,5 @@
+CREATE TABLE seats (
+    seat_id INT AUTO_INCREMENT PRIMARY KEY,
+    seat_number VARCHAR(10) NOT NULL UNIQUE,
+    is_booked BOOLEAN NOT NULL DEFAULT FALSE
+);
