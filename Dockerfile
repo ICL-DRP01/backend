@@ -5,12 +5,14 @@ WORKDIR /app
 # Based on: https://stackoverflow.com/a/68190141/10763533
 RUN apk add --no-cache gcc musl-dev mariadb-connector-c-dev
 
-COPY ./pyproject.toml ./README.md ./backend /app/
-COPY ./backend /app/backend/
+COPY requirements.txt .
 
-RUN pip install .
+RUN pip install mysqlclient
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "backend/app.py"]
+EXPOSE 5000
+
+CMD ["python", "app.py"]
 
