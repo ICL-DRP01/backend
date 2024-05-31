@@ -28,6 +28,18 @@ def hello():
     return jsonify({"results": results})
 
 
+@app.route("/clear", methods=["POST"])
+def clear():
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM seats")
+    mysql.connection.commit()
+    cur.close()
+    return (
+        jsonify({"message": "All seats are now free and removed from the database"}),
+        200,
+    )
+
+
 @app.route("/claim", methods=["POST"])
 def claim():
     data = request.json
