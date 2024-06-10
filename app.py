@@ -20,8 +20,8 @@ def hello():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM seats")
     results = [
-        {"seat_number": seat_number, "on_break": on_break}
-        for (seat_number, on_break) in cur
+        {"seat_number": seat_number, "on_break": on_break, "is_flagged": is_flagged}
+        for (seat_number, on_break, is_flagged) in cur
     ]
     cur.close()
 
@@ -101,6 +101,40 @@ def off_break():
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "Seat is now off break"}), 200
+
+
+@app.route("/flag", methods=["POST"])
+def flag():
+    seat_number = request.json.get("seat_number")
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM seats WHERE seat_number = %s", (seat_number,))
+    if not cur.fetchone():
+        cur.close()
+        return jsonify({"message": "Seat not found"}), 400
+
+    cur.execute(
+        "UPDATE seats SET is_flagged = 1 WHERE seat_number = %s", (seat_number,)
+    )
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Seat is now flagged"}), 200
+
+
+@app.route("/unflag", methods=["POST"])
+def unflag():
+    seat_number = request.json.get("seat_number")
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM seats WHERE seat_number = %s", (seat_number,))
+    if not cur.fetchone():
+        cur.close()
+        return jsonify({"message": "Seat not found"}), 400
+
+    cur.execute(
+        "UPDATE seats SET is_flagged = 0 WHERE seat_number = %s", (seat_number,)
+    )
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Seat is now unflagged"}), 200
 
 
 if __name__ == "__main__":
