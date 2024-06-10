@@ -88,6 +88,21 @@ def on_break():
     return jsonify({"message": "Seat is now on break"}), 200
 
 
+@app.route("/unbreak", methods=["POST"])
+def off_break():
+    seat_number = request.json.get("seat_number")
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM seats WHERE seat_number = %s", (seat_number,))
+    if not cur.fetchone():
+        cur.close()
+        return jsonify({"message": "Seat not found"}), 400
+
+    cur.execute("UPDATE seats SET on_break = 0 WHERE seat_number = %s", (seat_number,))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Seat is now off break"}), 200
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
