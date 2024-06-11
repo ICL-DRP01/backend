@@ -13,18 +13,24 @@ break_seats = set()
 
 users = set()
 
+def get_seats(seats: set) -> str:
+    return "{}" if not seats else str(seats)
+
 # dataBase = mysql.connector.connect(
 #   host = os.environ.get("MYSQL_HOST", "localhost"),
-#   user = os.environ.get("MYSQL_USER", "default_user"),
-#   passwd = os.environ.get("MYSQL_PASSWORD", "default_password"),
-#   db = os.environ.get("MYSQL_DB", "default_db")
+#   user = os.environ.get("MYSQL_USER", "admin"),
+#   passwd = os.environ.get("MYSQL_PASSWORD", "admin"),
+#   db = os.environ.get("MYSQL_DB", "myDb")
 # )
+
 
 async def update(websocket):
     global booked_seats, flagged_seats, break_seats, users
     try:
         users.add(websocket)
-        await websocket.send(f"booked: {booked_seats}, flagged: {flagged_seats}, break: {break_seats}")
+        await websocket.send(
+            f"booked: {get_seats(booked_seats)}, flagged: {get_seats(flagged_seats)}, break: {get_seats(break_seats)}"
+        )
         # cur = dataBase.cursor()
         async for message in websocket:
             match message.split(" ")[0]:
@@ -56,7 +62,10 @@ async def update(websocket):
                     flagged_seats = set()
                     break_seats = set()
                     # cur.execute("DELETE FROM seats")
-            websockets.broadcast(users, f"booked: {booked_seats}, flagged: {flagged_seats}, break: {break_seats}")
+            websockets.broadcast(
+                users,
+                f"booked: {get_seats(booked_seats)}, flagged: {get_seats(flagged_seats)}, break: {get_seats(break_seats)}",
+            )
         # cur.close()
     finally:
         users.remove(websocket)
@@ -71,7 +80,7 @@ async def main():
     async with websockets.serve(
         update,
         host="0.0.0.0",
-        port = int(os.environ.get("PORT", 5000)),
+        port=int(os.environ.get("PORT", 5000)),
     ):
         await stop
 
